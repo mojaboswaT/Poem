@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>An apology poem - For you</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;500;700&family=Alex+Brush&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg1: #f6d2ff;
+        --bg2: #ffe8f0;
+        --accent: #e84a66;
+        --accent-2: #ff8aa2;
+        --card: rgba(255,255,255,0.6);
+        --glass-border: rgba(255,255,255,0.25);
+      }
+
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Dancing Script", cursive;
+        background: linear-gradient(135deg,var(--bg1) 0%, #f7f0ff 30%, #fff 100%);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:32px;
+        min-height:100dvh;
+      }
+
+      .page{max-width:980px;width:min(100%,980px)}
+      .card{
+        background: linear-gradient(145deg, rgba(255,255,255,0.72), rgba(255,255,255,0.42));
+        border-radius:28px;
+        padding:20px;
+        box-shadow: 0 20px 60px rgba(20,12,46,0.16);
+        border:1px solid var(--glass-border);
+        margin: 0 auto;
+        width:min(100%, 100%);
+        box-sizing: border-box;
+        position:relative;
+        overflow:visible;
+      }
+      .single-panel{
+        border-radius:24px;
+        overflow:hidden;
+        background: linear-gradient(145deg, rgba(255,255,255,0.74), rgba(255,244,248,0.7));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+        padding:24px;
+        display:flex;
+        flex-direction:column;
+        gap:20px;
+        position:relative;
+      }
+      .single-panel.is-running,
+      .card.is-running {
+        overflow: visible;
+      }
+      .step-view{display:none;}
+      .step-view.active{display:flex;flex-direction:column;gap:18px;}
+      .controls{display:flex;gap:12px;justify-content:flex-end;align-items:center;margin-top:8px;position:relative;flex-wrap:nowrap;}
+      .card.is-running .controls,
+      .single-panel.is-running .controls{
+        position: static;
+      }
+      .step-view#step-intro.active,
+      .step-view#step-poem.active,
+      .step-view#step-apology.active{display:flex;}
+      .title{font-family:'Dancing Script',cursive;font-size:clamp(2.25rem, 4vw, 4rem);margin:0;color:#9b2b55;line-height:1}
+      .subtitle{margin:10px 0 0;color:#6b2b44;font-weight:500;font-size:1rem;max-width:22ch}
+      .eyebrow{margin:0 0 12px;color:#e84a66;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:.78rem}
+      .hero-copy{margin:18px 0 0;color:#6b2b44;font-size:1.05rem;line-height:1.6;max-width:34ch}
+
+      .intro-media{width:100%;margin:8px 0 0;opacity:0;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease;display:flex;justify-content:center;align-items:center}
+      .intro-media.visible{opacity:1;transform:none}
+
+      .intro-media img{display:block;width:100%;max-width:320px;height:auto;border-radius:20px;box-shadow:0 10px 28px rgba(0,0,0,0.12)}
+      .tenor-gif-embed{width:min(100%, 320px); border-radius:18px; overflow:hidden; box-shadow:0 10px 28px rgba(0,0,0,0.12); border:1px solid rgba(155,43,85,0.18); background:#fff; position:relative; }
+      .tenor-gif-embed a{display:none !important;}
+      .tenor-gif-embed iframe{display:block; border:0; width:100%; height:100%; min-height:320px;}
+
+.slide-image{
+        width:100%;
+        max-width:360px;
+        height:auto;
+        object-fit:cover;
+        border-radius:16px;
+        display:block;
+        box-shadow:0 10px 28px rgba(0,0,0,0.12);
+        border:1px solid rgba(155,43,85,0.18);
+        background: rgba(255,255,255,0.35);
+      }
+      .letter-piece{display:flex;justify-content:center;align-items:center}
+      .apology-box{background:rgba(255,255,255,0.72);border-radius:20px;padding:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.7)}
+      .slide-copy{margin:12px 0 0;color:#6b2b44;font-size:1.05rem;line-height:1.6}
+      .slide-accent{color:#e84a66;font-weight:700}
+      .btn { --btn-bg:#fff; --btn-text:#9b2b55; border:2px solid rgba(155,43,85,0.25); background:var(--btn-bg); color:var(--btn-text); padding:12px 28px; border-radius:50px; cursor:pointer; font-weight:600; min-height:44px; display:inline-flex; align-items:center; justify-content:center; touch-action: manipulation; -webkit-user-select:none; user-select:none; }
+      .btn.primary { background: linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:none }
+
+      /* "No" button runaway mode */
+      .btn.is-running {
+        position: absolute !important;
+        z-index: 9999;
+        transition: left 180ms ease, top 180ms ease;
+        will-change: left, top;
+        touch-action: none;
+        -webkit-touch-callout: none;
+      }
+
+
+      @media (max-width: 768px) {
+        body { padding: 16px; align-items:flex-start; }
+        .page { max-width:100%; width:100%; }
+        .card { padding:14px; width:100%; margin:0; }
+        .single-panel{padding:16px; gap:16px}
+        .title { font-size:28px }
+        .subtitle { font-size:0.95rem; max-width:100%; }
+        .intro-media img { max-width:100%; width:min(100%, 280px); }
+        .slide-image{max-width:100%; width:min(100%, 320px)}
+        .apology-box{padding:16px}
+        .controls{justify-content:center; gap:8px; flex-wrap:nowrap;}
+        .btn{padding:10px 16px; flex:1 1 0; min-width:0; max-width:none}
+      }
+
+      @media (max-width: 480px) {
+        body { padding: 10px; }
+        .card{padding:12px;border-radius:20px}
+        .single-panel{border-radius:18px; padding:14px}
+        .title{font-size:24px}
+        .subtitle{font-size:0.9rem}
+        .eyebrow{font-size:0.72rem; margin-bottom:8px}
+        .slide-copy{font-size:0.95rem}
+        .controls{gap:8px; flex-wrap:nowrap;}
+        .btn{padding:10px 12px; font-size:0.95rem; flex:1 1 0; min-width:0}
+      }
+
+      .typing-cursor{display:inline-block;width:8px;height:20px;background:#e84a66;margin-left:6px;border-radius:3px;vertical-align:middle;animation:blink 1s steps(2) infinite}
+      @keyframes blink{50%{opacity:0}}
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="card">
+        <section class="single-panel">
+          <section class="step-view active" id="step-intro">
+            <div>
+              <p class="eyebrow">A poem for you</p>
+              <h1 class="title">From Tabulawa Mojaboswa, </h1>
+              <p class="subtitle">with love and an open heart</p>
+            </div>
+
+            <div class="intro-media visible" id="intro-media" aria-hidden="true">
+              <div class="tenor-gif-embed" data-postid="6673820799117904175" data-share-method="host" data-aspect-ratio="1" data-width="100%">
+                <a href="https://tenor.com/view/love-in-love-blush-blushing-aww-gif-6673820799117904175">Love In Love GIF</a>
+                from <a href="https://tenor.com/search/love-gifs">Love GIFs</a>
+              </div>
+              <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+            </div>
+
+            <p class="slide-copy">Press next to continue!</p>
+          </section>
+
+          <section class="step-view" id="step-poem">
+            <div class="letter-piece">
+              <img
+                src="8df30c3a-f661-4e0e-a387-fbf3c66770d3.png"
+                alt="Letter image"
+                class="slide-image"
+              />
+            </div>
+          </section>
+
+          <section class="step-view" id="step-apology">
+            <img id="apologyGif" src="https://media.tenor.com/p_VEcmrBsLMAAAAj/manja.gif" alt="Manja GIF" style="width:320px;max-width:100%;display:block;margin:0 auto 14px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);" />
+            <p class="slide-copy">Do you accept my apology?</p>
+            <p id="responseMsg" class="slide-copy" style="margin-top:12px;text-align:center;font-weight:600;display:none;"></p>
+          </section>
+
+          <div class="controls">
+            <button id="prev" class="btn">Previous</button>
+            <button id="next" class="btn primary">Next</button>
+            <a id="messageBtn" class="btn primary" href="https://wa.me/26772428131" target="_blank" rel="noopener noreferrer" style="display:none; text-decoration:none;">Message</a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var introMedia = document.getElementById('intro-media');
+        if (introMedia) {
+          introMedia.classList.add('visible');
+        }
+
+        var stepViews = [document.getElementById('step-intro'), document.getElementById('step-poem'), document.getElementById('step-apology')];
+        var prevBtn = document.getElementById('prev');
+        var nextBtn = document.getElementById('next');
+        var messageBtn = document.getElementById('messageBtn');
+        var activeStep = 0;
+        var responseMsg = document.getElementById('responseMsg');
+        var apologyGif = document.getElementById('apologyGif');
+        var cardEl = document.querySelector('.card');
+        var panelEl = document.querySelector('.single-panel');
+
+        function showStep(step) {
+          stepViews.forEach(function (view, index) {
+            view.classList.toggle('active', index === step);
+          });
+
+          var slideEl = getSlideEl();
+          if (slideEl) {
+            slideEl.classList.remove('is-running');
+          }
+          if (panelEl) {
+            panelEl.classList.remove('is-running');
+          }
+
+          prevBtn.style.left = '';
+          prevBtn.style.top = '';
+          prevBtn.classList.remove('is-running');
+          prevBtn.style.position = '';
+          prevBtn.style.zIndex = '';
+          prevBtn.style.margin = '';
+          prevBtn.style.display = 'inline-flex';
+          nextBtn.style.display = 'inline-flex';
+
+          if (step === stepViews.length - 1) {
+            prevBtn.textContent = 'No';
+            prevBtn.classList.remove('primary');
+            nextBtn.textContent = 'Yes';
+            nextBtn.classList.add('primary');
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+          } else {
+            prevBtn.textContent = 'Previous';
+            prevBtn.classList.remove('primary');
+            nextBtn.textContent = 'Next';
+            nextBtn.classList.add('primary');
+            prevBtn.disabled = step === 0;
+            nextBtn.disabled = false;
+          }
+        }
+
+        function getSlideEl() {
+          return cardEl || prevBtn.parentElement;
+        }
+
+        function getTouchPoint(event) {
+          if (!event) return null;
+          if (typeof event.clientX === 'number' && typeof event.clientY === 'number') {
+            return { x: event.clientX, y: event.clientY };
+          }
+          if (event.touches && event.touches[0]) {
+            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+          }
+          if (event.changedTouches && event.changedTouches[0]) {
+            return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+          }
+          return null;
+        }
+
+        function moveNoOnce(event) {
+          var slideEl = getSlideEl();
+          if (!slideEl) return;
+          if (activeStep !== stepViews.length - 1) return;
+
+          if (slideEl) {
+            slideEl.classList.add('is-running');
+          }
+          if (panelEl) {
+            panelEl.classList.add('is-running');
+          }
+          prevBtn.classList.add('is-running');
+          prevBtn.style.position = 'absolute';
+          prevBtn.style.zIndex = '10000';
+          prevBtn.style.margin = '0';
+          prevBtn.style.display = 'inline-flex';
+
+          var slideRect = slideEl.getBoundingClientRect();
+          var btnRect = prevBtn.getBoundingClientRect();
+          var padding = 16;
+          var maxLeft = Math.max(0, slideRect.width - btnRect.width - padding);
+          var maxTop = Math.max(0, slideRect.height - btnRect.height - padding);
+          var pointerX = null;
+          var pointerY = null;
+          var point = getTouchPoint(event);
+
+          if (point) {
+            pointerX = point.x - slideRect.left;
+            pointerY = point.y - slideRect.top;
+          }
+
+          var newLeft = padding + Math.random() * Math.max(0, maxLeft - padding);
+          var newTop = padding + Math.random() * Math.max(0, maxTop - padding);
+
+          if (pointerX !== null && pointerY !== null) {
+            for (var attempts = 0; attempts < 24; attempts++) {
+              var buttonCenterX = newLeft + btnRect.width / 2;
+              var buttonCenterY = newTop + btnRect.height / 2;
+              var distance = Math.hypot(buttonCenterX - pointerX, buttonCenterY - pointerY);
+              if (distance > 120) {
+                break;
+              }
+              newLeft = padding + Math.random() * Math.max(0, maxLeft - padding);
+              newTop = padding + Math.random() * Math.max(0, maxTop - padding);
+            }
+          }
+
+          newLeft = Math.max(padding, Math.min(maxLeft, newLeft));
+          newTop = Math.max(padding, Math.min(maxTop, newTop));
+
+          prevBtn.style.left = newLeft + 'px';
+          prevBtn.style.top = newTop + 'px';
+        }
+
+        function handleYes() {
+          var apologyPrompt = document.querySelector('#step-apology > .slide-copy');
+          if (apologyGif) {
+            apologyGif.src = 'https://media1.tenor.com/m/0nT9FnDA9mgAAAAd/milk-and-mocha-cuddling.gif';
+            apologyGif.alt = 'Milk and Mocha cuddling GIF';
+          }
+          if (apologyPrompt) {
+            apologyPrompt.style.display = 'none';
+          }
+          if (responseMsg) {
+            responseMsg.textContent = 'Thank you, Palesa. I promise to do better and to honor your trust.';
+            responseMsg.style.display = 'block';
+          }
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+          if (messageBtn) {
+            messageBtn.style.display = 'inline-flex';
+          }
+        }
+
+        function handleNoAttempt(e) {
+          if (e) {
+            e.preventDefault();
+          }
+          moveNoOnce();
+        }
+
+        prevBtn.addEventListener('click', function (e) {
+          if (activeStep === stepViews.length - 1) {
+            handleNoAttempt(e);
+            return;
+          }
+          if (activeStep > 0) {
+            activeStep--;
+            showStep(activeStep);
+          }
+        });
+
+        nextBtn.addEventListener('click', function (e) {
+          if (activeStep === stepViews.length - 1) {
+            handleYes();
+            return;
+          }
+          if (activeStep < stepViews.length - 1) {
+            activeStep++;
+            showStep(activeStep);
+          }
+        });
+
+        prevBtn.addEventListener('mouseenter', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          moveNoOnce(e);
+        });
+
+        prevBtn.addEventListener('mousemove', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          moveNoOnce(e);
+        });
+
+        prevBtn.addEventListener('touchstart', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          moveNoOnce(e);
+        }, { passive: false });
+
+        prevBtn.addEventListener('touchmove', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          moveNoOnce(e);
+        }, { passive: false });
+
+        prevBtn.addEventListener('pointerdown', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          moveNoOnce(e);
+        });
+
+        prevBtn.addEventListener('pointermove', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          e.preventDefault();
+          e.stopPropagation();
+          moveNoOnce(e);
+        });
+
+        document.addEventListener('mousemove', function (e) {
+          if (activeStep !== stepViews.length - 1) return;
+          var rect = prevBtn.getBoundingClientRect();
+          if (!rect.width) return;
+          var isNearButton = e.clientX > rect.left - 50 && e.clientX < rect.right + 50 && e.clientY > rect.top - 50 && e.clientY < rect.bottom + 50;
+          if (isNearButton) {
+            moveNoOnce(e);
+          }
+        });
+
+        showStep(activeStep);
+      });
+    </script>
+  </body>
+</html>
